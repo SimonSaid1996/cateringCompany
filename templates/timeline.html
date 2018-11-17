@@ -1,0 +1,146 @@
+{% extends "layout.html" %}
+{% block title %}
+  {% if request.endpoint == 'public_timeline' %}
+    welcome to the catering company
+  {% elif request.endpoint == 'user_timeline' %}			{# user_timeline has staff and costumers that can access#}
+	{% if g.staff  %}
+		staff {{profile_user.username}}'s page
+	{% else %}	
+		{{ profile_user.username }}'s Page
+	{% endif %}
+  {% else %}											
+    {% if g.customer%}
+		customer {{g.customer.username}}'s Page									
+	{% elif g.staff %}
+		staff {{g.staff.username}}'s page
+	{% else %}
+		owner's page					
+	{% endif %}
+  {% endif %}
+{% endblock %}
+{% block body %}
+  <h2>{{ self.title() }}</h2>
+  {% if g.customer %}
+	{% if dateDuplicate %}<div class="dup">company already booked that day, try another day </div>{% endif %}
+	
+    <div class="twitbox">
+        <h3>create your own event {{ g.customer.username }}</h3>
+        <form action="{{ url_for('add_event') }}" method="post">
+          <p><input type="text" name="text" size="60"></p>
+		  <a>and event month</a>
+		  <select name="event_year">
+			<option value="2018" selected>2018</option>
+			<option value="2019" selected>2019</option>
+			<option value="2020" selected>2020</option>
+			<option value="2021" selected>2021</option>
+		  </select>
+		  <select name="event_month">
+			<option value="Jan" selected>Jan</option>
+			<option value="Feb">Feb</option>
+			<option value="Mar">Mar</option>
+			<option value="Apri">Apri</option>
+			<option value="May">May</option>
+			<option value="Jun">Jun</option>
+			<option value="Jul">Jul</option>
+			<option value="Aug">Aug</option>
+			<option value="Sep">Sep</option>
+			<option value="Oct">Oct</option>
+			<option value="Nov">Nov</option>
+			<option value="Dec" >Dec</option>
+		  </select>
+		  <select name="event_date">
+			<option value="1" selected>01</option>
+			<option value="2">02</option>
+			<option value="3">03</option>
+			<option value="4">04</option>
+			<option value="5">05</option>
+			<option value="6">06</option>
+			<option value="7">07</option>
+			<option value="8">08</option>
+			<option value="9">09</option>
+			<option value="10">10</option>
+			<option value="11">11</option>
+			<option value="12" >12</option>
+			<option value="13" >13</option>
+			<option value="14" >14</option>
+			<option value="15" >15</option>
+			<option value="16" >16</option>
+			<option value="17" >17</option>
+			<option value="18" >18</option>
+			<option value="19" >19</option>
+			<option value="20" >20</option>
+			<option value="21" >21</option>
+			<option value="22" >22</option>
+			<option value="23" >23</option>
+			<option value="24" >24</option>
+			<option value="25" >25</option>
+			<option value="26" >26</option>
+			<option value="27" >27</option>
+			<option value="28" >28</option>
+			<option value="29" >29</option>
+			<option value="30" >30</option>
+			<option value="31" >31</option>
+		  </select>	
+		  
+          <input type="submit" value="Post">
+        </form>
+     </div>
+	 		below are the events you scheduled
+	<br/><br/>
+  {% elif g.owner %}
+  <div class="navigation">    
+    <a href="{{ url_for('register') }}">sign up for staff</a> 
+  </div>				
+	<a>  below are the event list:</a>
+	<br/><br/>
+  {% elif g.staff %}
+	{% if sign_events %}
+		signed up events:<br/>
+		{% for event in sign_events %}
+			working on {{event.joiner.username}}'s event
+			<small>&mdash;{{ event.text }} on: {{ event.event_year }} / {{ event.event_month }} / {{event.event_date}} </small>
+			<br />
+		{% endfor %}
+	{% else %}
+		no singed_up events<br/>
+    {% endif %}
+	{% if available_events %}
+		<br/>other available events:<br/>
+		{% for event in available_events %}
+			{{event.joiner.username}}'s event
+				<em><a href="{{ url_for('sign_event', username = g.staff.username, eveID = event.event_id) }}"> sign up to help </a></em>
+				<small>&mdash;{{ event.text }} on: {{ event.event_year }} / {{ event.event_month }} / {{event.event_date}} </small>
+				<br />
+		{% endfor %}
+	{% else %}
+		no events have been scheduled
+	{% endif %}
+  {% endif %}
+   <ul class="events"><p>
+	{% if events %}
+	{% for event in events %}
+		{{event.joiner.username}}
+		{% if g.customer %}
+			<em><a href="{{ url_for('cancel_event', user_id=event.joiner.user_id) }}">to cancel the event {{ event.text }}</a></em>
+			<small>&mdash;  {{ event.event_year }} / {{ event.event_month }} / {{event.event_date}} </small>
+		{% elif g.owner %}
+				{% if event.has_staff()%}
+					{% for staff in event.worked_on%}
+						<br/>
+						<em> staff: {{staff.username}} is working on the event </em>
+					{% endfor%}	
+				{% else %}
+					no staff working on the event
+				{% endif %}
+			<small>&mdash;{{ event.text }} on: {{ event.event_year }} / {{ event.event_month }} / {{event.event_date}} </small>
+		{% endif %}
+		
+	  <li></li>
+	{% endfor %}
+	{% else %}
+		{% if g.owner %}
+			<em> no events has been scheduled </em>
+		{% endif %}
+	{% endif %}
+	</ul> 
+{% endblock %}

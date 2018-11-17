@@ -1,0 +1,25 @@
+<!doctype html>
+<title>{% block title %}Welcome{% endblock %} | CATERING COMPANY</title>
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+<div class="page">
+  <h1>Catering company</h1>
+  <div class="navigation">
+  {% if g.staff %}
+    
+    <a href="{{ url_for('logout') }}">sign out [{{ g.staff.username }}]</a>
+  {% elif g.owner %}
+	
+    <a href="{{ url_for('logout') }}">sign out [{{ g.owner.username }}]</a>
+  {% elif g.customer %}
+  
+    <a href="{{ url_for('logout') }}">sign out [{{ g.customer.username }}]</a>  
+  {% else %}
+    <a href="{{ url_for('register') }}">sign up</a> |
+    <a href="{{ url_for('login') }}">sign in</a>
+  {% endif %}
+  {% block body %}{% endblock %}
+  </div>
+  <div class="footer">
+    we deliever events
+  </div>
+</div>
